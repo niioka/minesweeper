@@ -11,6 +11,7 @@ export interface Grid {
   x: number;
   y: number;
   neighborBombCount: number;
+  backgroundColor?: string;
 }
 
 export interface Board {
@@ -35,7 +36,8 @@ export interface GameState {
   elapsedSeconds: number;
   status: "READY" | "PLAYING" | "COMPLETE" | "GAMEOVER";
   board: Board;
+  endTime: number;
+  bestTime: number;
 }
 
 export type SetGameState = React.Dispatch<React.SetStateAction<GameState>>;
-export type GameStateRef = React.MutableRefObject<GameState>;

@@ -18,26 +18,43 @@ const GridView: React.FC<Props> = ({ grid, isDisabled, openCover, changeMark }) 
     );  
   } else if (grid.type === "BOMB") {
     return (
-      <div key={key} className={`${styles['grid']} ${styles['grid--bomb']}`}>
+      <div key={key} className={`${styles['grid']} ${styles['grid--bomb']}`}
+        style={{
+          backgroundColor: grid.backgroundColor,
+          borderColor: grid.backgroundColor,
+        }}
+      >
         💣
       </div>
     );
   }
+
+  let markStr;
+  switch (grid.mark) {
+    case 'FLAG': markStr = '🚩'; break;
+    case 'UNKNOWN': markStr = '❓'; break;
+    default: markStr = '\u00A0'; break;
+  }
+
   return (
     <div key={key} 
       className={`${styles['grid']} ${styles['grid--cover']}`} 
       onContextMenu={(event) => {
         event.preventDefault();
+        if (isDisabled) {
+          return;
+        }
         changeMark(grid);
       }}
       onClick={(event) => {
+        event.preventDefault();
         if (isDisabled) {
           return;
         }
         openCover(grid);
       }}
     >
-      { grid.mark === 'FLAG' && '🚩' }
+      {markStr}
     </div>
   );
 };

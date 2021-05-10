@@ -26,7 +26,9 @@ function init(width: number, height: number, bombCount: number): GameState {
       width,
       height,
       getBombPositions: getRandomBombPositions(bombCount),
-    })
+    }),
+    endTime: -1,
+    bestTime: -1,
   };
 }
 
@@ -78,7 +80,13 @@ const GameContainer: React.VFC<Props> = ({ width, height, bombCount, backToMenu 
         <GameOverPopup isOpen={state.isGameOverPopupOpen} retry={() => retry(setState)} backToMenu={backToMenu} />
       }
       renderConguratulationPopup={() =>
-        <ConguratulationPopup isOpen={state.isConguratulationPopupOpen} />
+        <ConguratulationPopup 
+          isOpen={state.isConguratulationPopupOpen} 
+          time={state.endTime} 
+          bestTime={state.bestTime} 
+          retry={() => retry(setState)}
+          backToMenu={backToMenu}
+        />
       }
     />
   );

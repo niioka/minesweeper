@@ -1,3 +1,4 @@
+import { Button } from '../Button';
 import styles from './GameOverPopup.module.css';
 
 interface Props {
@@ -14,8 +15,8 @@ const GameOverPopup: React.FC<Props> = ({ isOpen, retry, backToMenu }) => {
   return (
     <div className={styles['root']}>
       <div className={styles['title']}>Game Over</div>
-      <div><button className={styles['button']} onClick={retry}>Retry</button></div>
-      <div><button className={styles['button']} onClick={backToMenu}>Back to MENU</button></div>
+      <div><Button className={styles['button']} onClick={retry}>Retry</Button></div>
+      <div><Button className={styles['button']} onClick={backToMenu}>Back to MENU</Button></div>
     </div>
   );
 };

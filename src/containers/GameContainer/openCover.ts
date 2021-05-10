@@ -1,6 +1,6 @@
-import produce from "immer";
+import produce, { Draft } from "immer";
 import { getNeighborGrids8Way, gridAt } from "./common";
-import { Board, GameState, GameStateRef, Grid, SetGameState } from "./types";
+import { Board, GameState, Grid, SetGameState } from "./types";
 
 async function openCover(
   state: GameState,
@@ -31,6 +31,7 @@ function burst(setState: SetGameState): void {
     for (let grid of draftState.board.grids) {
       if (grid.isBomb) {
         grid.type = "BOMB";
+        grid.backgroundColor = '#fcc';
       }
     }
     draftState.status = "GAMEOVER";
@@ -52,16 +53,33 @@ function openGrid(setState: SetGameState, grid: Grid): Promise<void> {
           draftState.startTime = new Date().getTime();
         }
         if (draftState.restBlankCount <= 0) {
-          draftState.status = "COMPLETE";
-          setTimeout(() => {
-            setState((prevState) => ({ ...prevState, isConguratulationPopupOpen: true }));
-            resolve();
-          }, 1000);
+          completeGame(draftState, setState).then(resolve);
         } else {
           resolve();
         }
       })
     ));
+}
+
+async function completeGame(state: Draft<GameState>, setState: SetGameState): Promise<void> {
+  state.status = "COMPLETE";
+  state.endTime = state.elapsedSeconds;
+  const bestTimeStr = window.localStorage.getItem('minesweeper.bestTime');
+  let bestTime = bestTimeStr ? Number(bestTimeStr) : Number.MAX_SAFE_INTEGER;
+  if (state.endTime < bestTime) {
+    bestTime = state.endTime;
+    window.localStorage.setItem('minesweeper.bestTime', '' + bestTime);
+  }
+  state.bestTime = bestTime;
+  // open bombs
+  for (let grid of state.board.grids) {
+    if (grid.isBomb) {
+      grid.type = "BOMB";
+      grid.backgroundColor = '#ccf';
+    }
+  } 
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  setState((prevState) => ({ ...prevState, isConguratulationPopupOpen: true }));
 }
 
 function showGameOverPopup(setState: SetGameState) {

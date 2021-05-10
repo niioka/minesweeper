@@ -1,12 +1,8 @@
-import React, { useReducer, useState } from 'react';
-import { produce } from "immer";
+import React, { useState } from 'react';
 import './App.css';
 import { GameContainer } from './containers/GameContainer';
-import { GameState, SetGameState } from './containers/GameContainer/types';
 import { MenuContainer } from './containers/MenuContainer';
 import { StartGameArgs } from './types/game';
-
-type Action = { type: 'START_GAME', args: StartGameArgs };
 
 type State = {
   currentPage: 'MENU';
