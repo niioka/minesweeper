@@ -1,9 +1,9 @@
 import type { GameData, InitGameOptions } from '$lib/models/game';
-import type { BoardData } from '$lib/models/board';
+import type { BoardData, GridData } from '$lib/models/board';
 import * as B from '$lib/logics/board-logic';
 import type { PositionData } from '$lib/models/position';
 
-export function initGame({ width, height, getMinePositions }: InitGameOptions): GameData {
+export function initGame({ stageType, width, height, getMinePositions }: InitGameOptions): GameData {
 	const board = B.createBoard({
 		width,
 		height,
@@ -20,6 +20,7 @@ export function initGame({ width, height, getMinePositions }: InitGameOptions): 
 		elapsedSeconds: 0,
 		status: 'READY',
 		board,
+		stageType,
 		endTime: -1,
 		bestTime: -1
 	};
@@ -43,9 +44,14 @@ export function getRandomBombPositions(bombCount: number): (board: BoardData) =>
 	};
 }
 
+function getTime_(): number {
+	return new Date().getTime();
+}
+
 export function openCover(
 	game: GameData,
-	{ x, y }: PositionData
+	{ x, y }: PositionData,
+	{ getTime = getTime_ }: { getTime?: () => number } = {}
 ): void {
 	const grid = B.gridAt(game.board, { x, y });
 	// オープン済みの場合は何もしない
@@ -54,34 +60,49 @@ export function openCover(
 	}
 	// 地雷を踏んだ場合はゲームオーバー
 	if (grid.type === 'MINE') {
-		game.status = 'GAMEOVER';
-		B.openBombsOnFailure(game.board);
+		gameOver(game);
 		return;
 	}
 	B.openGrid(game.board, grid);
-	const restBlankCount = B.countRestBlankCount(game.board);
+	game.restBlankCount = B.countRestBlankCount(game.board);
 	let status = game.status;
 	if (status === 'READY') {
 		game.status = 'PLAYING';
-		game.startTime = new Date().getTime();
-		game.restBlankCount = restBlankCount;
+		game.startTime = getTime();
 	}
-
-	if (restBlankCount <= 0) {
+	if (game.restBlankCount <= 0) {
 		completeGame(game);
 		return;
 	}
 }
 
+export function gameOver(game: GameData): void {
+	game.status = 'GAMEOVER';
+	B.openBombsOnFailure(game.board);
+}
 
 function completeGame(game: GameData): void {
-	const bestTimeStr = window.localStorage.getItem('minesweeper.bestTime');
+	game.status = 'COMPLETE';
+	game.endTime = Math.floor((getTime_() - game.startTime) / 1000);
+	const bestTimeStr = window.localStorage.getItem('minesweeper.bestTime.stageType');
 	let bestTime = bestTimeStr ? Number(bestTimeStr) : Number.MAX_SAFE_INTEGER;
 	if (game.endTime < bestTime) {
 		bestTime = game.endTime;
-		window.localStorage.setItem('minesweeper.bestTime', '' + bestTime);
+		window.localStorage.setItem('minesweeper.bestTime.' + game.stageType, '' + bestTime);
 	}
 	// open bombs
 	B.showMinesOnSuccess(game.board);
 	game.bestTime = bestTime;
+}
+
+export function changeMark(game: GameData, grid: GridData) {
+	if (grid.displayType === 'COVERED') {
+		grid.displayType = 'FLAG';
+		game.restBombCount--;
+	} else if (grid.displayType === 'FLAG') {
+		grid.displayType = 'UNKNOWN';
+		game.restBombCount++;
+	} else if (grid.displayType === 'UNKNOWN') {
+		grid.displayType = 'COVERED';
+	}
 }

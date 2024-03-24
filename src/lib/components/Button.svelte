@@ -4,23 +4,25 @@
 
 	const dispatch = createEventDispatcher<{
 		click: null,
-	}>()
+	}>();
+
 	function handleClick() {
-		dispatch('click')
+		dispatch('click');
 	}
 </script>
 
 <button class="button" on:click|preventDefault={handleClick}>
-		<slot />
+	<slot />
 </button>
 
 <style>
-		.button {
+    .button {
         border: 2px solid #bbb;
         outline: none;
         background-color: #bbb;
         font-size: 10px;
-		}
+        width: 100%;
+    }
 
     .button:hover {
         border: 2px solid #888;

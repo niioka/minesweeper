@@ -2,10 +2,15 @@ import type { BoardData } from '$lib/models/board';
 import type { PositionData } from '$lib/models/position';
 
 export type InitGameOptions = {
+	stageType: StageType;
 	width: number;
 	height: number;
 	getMinePositions: (board: BoardData) => PositionData[];
 }
+
+type GameStatus = 'READY' | 'PLAYING' | 'COMPLETE' | 'GAMEOVER';
+
+type StageType = 'EASY' | 'NORMAL' | 'HARD';
 
 export type GameData = {
 	isGameOverPopupOpen: boolean;
@@ -15,10 +20,13 @@ export type GameData = {
 	restBombCount: number;
 	restBlankCount: number;
 	elapsedSeconds: number;
-	status: 'READY' | 'PLAYING' | 'COMPLETE' | 'GAMEOVER';
+	status: GameStatus;
 	board: BoardData;
-	endTime: number;
-	bestTime: number;
+	/** ゲーム終了日時 */
+	endTime?: number;
+	/** ベストタイム */
+	bestTime?: number;
+	stageType: StageType;
 }
 
 export type StartGameEventPayload = {

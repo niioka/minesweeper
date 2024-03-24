@@ -12,14 +12,46 @@
 		game = initGame({ width, height, getMinePositions: getRandomBombPositions(bombCount) });
 	}
 
+	function handleRetry() {
+		if (game) {
+			game = initGame({
+				width: game.board.width,
+				height: game.board.height,
+				getMinePositions: getRandomBombPositions(game.initialBombCount)
+			});
+		}
+	}
+
 	function handleUpdateGame(event: CustomEvent<GameData>) {
-		game = event.detail;
+		let game_ = event.detail;
+		game = game_;
+		if (game_.status === 'GAMEOVER' && !game_.isGameOverPopupOpen) {
+			setTimeout(() => {
+				game_.isGameOverPopupOpen = true;
+				game = game_;
+			}, 1000);
+		}
+	}
+
+	function handleBackToMenu() {
+		game = undefined;
 	}
 </script>
 
+<div class="root">
+	{#if game === undefined}
+		<MenuPage on:startGame={handleStartGame} />
+	{:else}
+		<GamePage game={game} on:updateGame={handleUpdateGame} on:backToMenu={handleBackToMenu} on:retry={handleRetry} />
+	{/if}
+</div>
 
-{#if game === undefined}
-	<MenuPage on:startGame={handleStartGame} />
-{:else}
-	<GamePage game={game} on:updateGame={handleUpdateGame} />
-{/if}
+<style>
+    .root {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #ccc;
+    }
+</style>

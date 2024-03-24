@@ -20,12 +20,12 @@
 	<div class="title">Game Over</div>
 	<div class="button">
 		<Button on:click={handleRetryButtonClick}>
-			Retry
+			RETRY
 		</Button>
 	</div>
 	<div class="button">
 		<Button on:click={handleBackButtonClick}>
-			Back to MENU
+			BACK TO MENU
 		</Button>
 	</div>
 </div>
@@ -35,6 +35,7 @@
         position: absolute;
         background-color: #fff;
         padding: 10px;
+        border: 1px black solid;
     }
 
     .title {

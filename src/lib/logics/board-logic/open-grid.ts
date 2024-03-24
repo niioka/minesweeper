@@ -33,7 +33,6 @@ function getSafeGrids(board: BoardData, grid: GridData) {
 		const neighbors = getNearbyCoveredSafeGrids(board, target).filter(
 			g => visitTable.isNotVisited(g)
 		);
-		console.log('neighbors', neighbors);
 		for (let neighbor of neighbors) {
 			if (neighbor.neighborBombCount > 0) {
 				results.push(neighbor);

@@ -68,7 +68,7 @@ export function indexOf(board: BoardData, { x, y }: PositionData) {
 }
 
 export function countRestBlankCount(board: BoardData): number {
-	return board.grids.filter((g) => g.type === 'BLANK').length;
+	return board.grids.filter((g) => g.type === 'BLANK' && g.displayType !== 'BLANK').length;
 }
 
 export function toTestString(board: BoardData, { showNeighborCount = false }: {

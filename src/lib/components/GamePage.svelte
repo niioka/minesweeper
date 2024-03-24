@@ -3,9 +3,13 @@
 	import Title from '$lib/components/Title.svelte';
 	import BoardView from '$lib/components/BoardView.svelte';
 	import type { GameData } from '$lib/models/game';
-	import { createEventDispatcher } from 'svelte';
-	import type { BoardData } from '$lib/models/board';
-	import BombCountLabel from '$lib/components/BombCountLabel.svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import type { GridData } from '$lib/models/board';
+	import MineCounter from '$lib/components/MineCounter.svelte';
+	import { changeMark, gameOver, openCover } from '$lib/logics/game-logic';
+	import GameOverPopup from '$lib/components/GameOverPopup.svelte';
+	import CongratulationPopup from '$lib/components/CongratulationPopup.svelte';
+	import ElapsedTimeCounter from '$lib/components/ElapsedTimeCounter.svelte';
 
 	export let game: GameData;
 
@@ -13,8 +17,30 @@
 		updateGame: GameData;
 	}>();
 
+	$: enabled = game.status === 'PLAYING' || game.status === 'READY';
 
-	function handleUpdateBoard(event: CustomEvent<BoardData>) {
+	onMount(() => {
+		setInterval(() => {
+			if (game.status === 'PLAYING') {
+				game.elapsedSeconds = Math.floor((new Date().getTime() - game.startTime) / 1000);
+				dispatch('updateGame', game);
+			}
+		}, 500);
+	});
+
+	function handleDiscard() {
+		gameOver(game);
+		game.isGameOverPopupOpen = true;
+		dispatch('updateGame', game);
+	}
+
+	function handleChangeMark(ev: CustomEvent<GridData>) {
+		changeMark(game, ev.detail);
+		dispatch('updateGame', game);
+	}
+
+	function handleOpenCover(ev: CustomEvent<GridData>) {
+		openCover(game, ev.detail);
 		dispatch('updateGame', game);
 	}
 </script>
@@ -23,16 +49,24 @@
 	<div>
 		<div class="header">
 			<Title />
-			<div class="discard">✘</div>
+			{#if game.status === 'READY' || game.status === 'PLAYING'}
+				<button class="discard" on:click={handleDiscard}>✘</button>
+			{/if}
 		</div>
 		<div class="info">
-			<BombCountLabel count={game.restBombCount} />
-			<div class="time">
-				⏱{("000" + game.elapsedSeconds).slice(-3)}
-			</div>
+			<MineCounter count={game.restBombCount} />
+			<ElapsedTimeCounter seconds={game.elapsedSeconds} />
 		</div>
-		<BoardView board={game.board} on:updateBoard={handleUpdateBoard} />
+		<BoardView board={game.board} isDisabled={!enabled}
+							 on:changeMark={handleChangeMark}
+							 on:openCover={handleOpenCover} />
 	</div>
+	{#if game.isGameOverPopupOpen}
+		<GameOverPopup on:backToMenu on:retry />
+	{/if}
+	{#if game.status === 'COMPLETE'}
+		<CongratulationPopup time={game.endTime} bestTime={game.bestTime} on:backToMenu on:retry />
+	{/if}
 </div>
 
 <style>
@@ -42,10 +76,13 @@
         justify-content: center;
         align-items: center;
         background-color: white;
+        padding: 8px;
+        border-radius: 8px;
     }
 
     .header {
         display: flex;
+        user-select: none;
     }
 
     .discard {
@@ -60,13 +97,9 @@
     .info {
         display: grid;
         grid-template-columns: 2fr 1fr;
+        user-select: none;
+        margin-bottom: 8px;
     }
 
 
-    .time {
-        color: #444;
-        background-color: white;
-        font-size: 16px;
-        justify-self: end;
-    }
 </style>

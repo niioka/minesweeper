@@ -3,8 +3,8 @@
 	import Button from '$lib/components/Button.svelte';
 	import { createEventDispatcher } from 'svelte';
 
-	export let time: number;
-	export let bestTime: number;
+	export let time: number | undefined;
+	export let bestTime: number | undefined;
 
 	const dispatch = createEventDispatcher<{
 		retry: null;
