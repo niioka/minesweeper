@@ -84,7 +84,7 @@ export function gameOver(game: GameData): void {
 function completeGame(game: GameData): void {
 	game.status = 'COMPLETE';
 	game.endTime = Math.floor((getTime_() - game.startTime) / 1000);
-	const bestTimeStr = window.localStorage.getItem('minesweeper.bestTime.stageType');
+	const bestTimeStr = window.localStorage.getItem('minesweeper.bestTime.' + game.stageType);
 	let bestTime = bestTimeStr ? Number(bestTimeStr) : Number.MAX_SAFE_INTEGER;
 	if (game.endTime < bestTime) {
 		bestTime = game.endTime;

@@ -8,13 +8,14 @@
 	let game: GameData | undefined = undefined;
 
 	function handleStartGame(event: CustomEvent<StartGameEventPayload>) {
-		const { width, height, bombCount } = event.detail;
-		game = initGame({ width, height, getMinePositions: getRandomBombPositions(bombCount) });
+		const { stageType, width, height, bombCount } = event.detail;
+		game = initGame({ stageType, width, height, getMinePositions: getRandomBombPositions(bombCount) });
 	}
 
 	function handleRetry() {
 		if (game) {
 			game = initGame({
+				stageType: game.stageType,
 				width: game.board.width,
 				height: game.board.height,
 				getMinePositions: getRandomBombPositions(game.initialBombCount)

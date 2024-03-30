@@ -10,7 +10,7 @@ export type InitGameOptions = {
 
 type GameStatus = 'READY' | 'PLAYING' | 'COMPLETE' | 'GAMEOVER';
 
-type StageType = 'EASY' | 'NORMAL' | 'HARD';
+export type StageType = 'EASY' | 'NORMAL' | 'HARD';
 
 export type GameData = {
 	isGameOverPopupOpen: boolean;
@@ -30,6 +30,7 @@ export type GameData = {
 }
 
 export type StartGameEventPayload = {
+	stageType: StageType
 	width: number
 	height: number
 	bombCount: number
