@@ -6,32 +6,47 @@ export type InitGameOptions = {
 	width: number;
 	height: number;
 	getMinePositions: (board: BoardData) => PositionData[];
+	currentTime: number;
 }
 
-type GameStatus = 'READY' | 'PLAYING' | 'COMPLETE' | 'GAMEOVER';
 
 export type StageType = 'EASY' | 'NORMAL' | 'HARD';
 
+
 export type GameData = {
-	isGameOverPopupOpen: boolean;
-	isCongratulationPopupOpen: boolean;
-	startTime: number;
 	initialBombCount: number;
 	restBombCount: number;
 	restBlankCount: number;
 	elapsedSeconds: number;
-	status: GameStatus;
 	board: BoardData;
-	/** ゲーム終了日時 */
-	endTime?: number;
-	/** ベストタイム */
-	bestTime?: number;
+	currentTime: number;
 	stageType: StageType;
 }
 
-export type StartGameEventPayload = {
-	stageType: StageType
-	width: number
-	height: number
-	bombCount: number
+export type SelectStageState = {
+	type: 'SELECT-STAGE';
 }
+
+export type PlayingState = {
+	type: 'PLAYING';
+	startTime?: number;
+	game: GameData;
+}
+
+export type GameOverState = {
+	type: 'GAME-OVER';
+	q: 'SHOW-MINES' | 'POPUP-PENDING' | 'POPUP-OPEN';
+	nextTime: number;
+	game: GameData;
+}
+
+export type CompleteState = {
+	type: 'COMPLETE';
+	q: 'SHOW-MINES' | 'POPUP-PENDING' | 'POPUP-OPEN';
+	nextTime: number;
+	/** ベストタイム */
+	bestTime: number;
+	game: GameData;
+}
+
+export type GameState = SelectStageState | PlayingState | GameOverState | CompleteState;

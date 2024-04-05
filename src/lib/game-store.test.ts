@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { initGame, openCover } from '$lib/logics/game-logic';
 import { toTestString } from '$lib/logics/board-logic/base';
+import { gameStore } from '$lib/game-store';
+import { get } from 'svelte/store';
+import type { PlayingState } from '$lib/models/game';
 
-describe('ゲーム関連ロジック', () => {
-	describe('ゲームの初期化', () => {
+describe('GameStore', () => {
+	describe('初期化', () => {
 		it('9x9のゲームを作成', () => {
-
-			const game = initGame({
+			gameStore.init({
 				stageType: 'EASY',
 				width: 9,
 				height: 9,
@@ -16,21 +17,19 @@ describe('ゲーム関連ロジック', () => {
 					{ x: 3, y: 3 },
 					{ x: 4, y: 4 },
 					{ x: 5, y: 5 }
-				]
+				],
+				currentTime: 1700000000
 			});
-			const { board, ...gameWithoutBoard } = game;
-			expect(gameWithoutBoard).toEqual({
-				bestTime: -1,
+			const state = get(gameStore.state);
+			expect(state.type).toEqual('PLAYING');
+			const { board, ...game_ } = (state as PlayingState).game;
+			expect(game_).toEqual({
 				elapsedSeconds: 0,
-				endTime: -1,
 				initialBombCount: 5,
-				isCongratulationPopupOpen: false,
-				isGameOverPopupOpen: false,
 				restBlankCount: 81 - 5,
 				restBombCount: 5,
-				startTime: 0,
-				status: 'READY',
-				stageType: 'EASY'
+				stageType: 'EASY',
+				currentTime: 1700000000
 			});
 			expect(board.width).toBe(9);
 			expect(board.height).toBe(9);
@@ -50,26 +49,38 @@ describe('ゲーム関連ロジック', () => {
 
 	describe('セルを開く', () => {
 		it('地雷を踏んだ場合はゲームオーバー', () => {
-			const game = initGame({ stageType: 'EASY', width: 4, height: 4, getMinePositions: (board) => [{ x: 1, y: 1 }] });
-			openCover(game, { x: 1, y: 1 });
-			expect(game.status).toBe('GAMEOVER');
+			gameStore.init({
+				stageType: 'EASY',
+				width: 4,
+				height: 4,
+				getMinePositions: (board) => [{ x: 1, y: 1 }],
+				currentTime: 1700000000
+			});
+			gameStore.openCover({ x: 1, y: 1 });
+			const state = get(gameStore.state);
+			expect(state.type).toBe('GAME-OVER');
 		});
 
 		it('地雷を踏まない場合はマスを開いて続行', () => {
-			const game = initGame({ stageType: 'EASY', width: 4, height: 4, getMinePositions: (board) => [{ x: 1, y: 1 }] });
-			openCover(game, { x: 0, y: 0 }, { getTime: () => 1700000000 });
-			const { board, ...game_ } = game;
+			gameStore.init({
+				stageType: 'EASY',
+				width: 4,
+				height: 4,
+				getMinePositions: (board) => [{ x: 1, y: 1 }],
+				currentTime: 1700000000
+			});
+			gameStore.openCover({ x: 0, y: 0 });
+			const state = get(gameStore.state);
+			expect(state.type).toBe('PLAYING');
+			const state_ = state as PlayingState;
+			expect(state_.startTime).toBe(1700000000);
+			const { board, ...game_ } = state_.game;
 			expect(game_).toEqual({
-				bestTime: -1,
 				elapsedSeconds: 0,
-				endTime: -1,
 				initialBombCount: 1,
-				isCongratulationPopupOpen: false,
-				isGameOverPopupOpen: false,
 				restBlankCount: 14,
 				restBombCount: 1,
-				startTime: 1700000000,
-				status: 'PLAYING',
+				currentTime: 1700000000,
 				stageType: 'EASY'
 			});
 		});

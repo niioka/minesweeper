@@ -1,6 +1,7 @@
 import type { BoardData, GridData } from '$lib/models/board';
 import type { PositionData } from '$lib/models/position';
 import * as P from '$lib/logics/position-logic';
+import { isCovered } from '$lib/logics/grid-logic';
 
 export function getNeighborGrids8Way(board: BoardData, pos: PositionData): GridData[] {
 	const results = getNeighborGrids4Way(board, pos);
@@ -100,3 +101,15 @@ export function toTestString(board: BoardData, { showNeighborCount = false }: {
 	return results;
 }
 
+export function getNotOpenedBombCount(board: BoardData): number {
+	return board.grids.filter((g) => g.type === 'MINE' && isCovered(g)).length;
+}
+
+export function showNextBomb(board: BoardData, showType: 'BURST' | 'CLEAR'): boolean {
+	const grid = board.grids.find((g) => g.type === 'MINE' && isCovered(g));
+	if (grid) {
+		grid.displayType = showType === 'BURST' ? 'MINE' : 'CLEARED_MINE';
+		return true;
+	}
+	return false;
+}

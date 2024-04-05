@@ -1,18 +1,14 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { gameStore } from '$lib/game-store';
 
-	const dispatch = createEventDispatcher<{
-		retry: null,
-		backToMenu: null,
-	}>();
 
 	function handleRetryButtonClick() {
-		dispatch('retry');
+		gameStore.retry(new Date().getTime());
 	}
 
 	function handleBackButtonClick() {
-		dispatch('backToMenu');
+		gameStore.backToMenu();
 	}
 </script>
 

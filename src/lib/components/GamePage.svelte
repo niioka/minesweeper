@@ -2,46 +2,36 @@
 
 	import Title from '$lib/components/Title.svelte';
 	import BoardView from '$lib/components/BoardView.svelte';
-	import type { GameData } from '$lib/models/game';
+	import type { CompleteState, GameData, GameOverState, PlayingState } from '$lib/models/game';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { GridData } from '$lib/models/board';
 	import MineCounter from '$lib/components/MineCounter.svelte';
-	import { changeMark, gameOver, openCover } from '$lib/logics/game-logic';
 	import GameOverPopup from '$lib/components/GameOverPopup.svelte';
 	import CongratulationPopup from '$lib/components/CongratulationPopup.svelte';
 	import ElapsedTimeCounter from '$lib/components/ElapsedTimeCounter.svelte';
+	import { gameStore } from '$lib/game-store';
 
-	export let game: GameData;
+	export let state: PlayingState | GameOverState | CompleteState;
+
 
 	const dispatch = createEventDispatcher<{
 		updateGame: GameData;
 	}>();
 
-	$: enabled = game.status === 'PLAYING' || game.status === 'READY';
+	$: enabled = state.type === 'PLAYING';
+	$: game = state.game;
+	$: isGameOverPopupOpen = state.type === 'GAME-OVER' && state.q === 'POPUP-OPEN';
 
 	onMount(() => {
-		setInterval(() => {
-			if (game.status === 'PLAYING') {
-				game.elapsedSeconds = Math.floor((new Date().getTime() - game.startTime) / 1000);
-				dispatch('updateGame', game);
-			}
-		}, 500);
+		setInterval(() => gameStore.tick(new Date().getTime()), 100);
 	});
 
-	function handleDiscard() {
-		gameOver(game);
-		game.isGameOverPopupOpen = true;
-		dispatch('updateGame', game);
-	}
-
 	function handleChangeMark(ev: CustomEvent<GridData>) {
-		changeMark(game, ev.detail);
-		dispatch('updateGame', game);
+		gameStore.changeMark(ev.detail);
 	}
 
 	function handleOpenCover(ev: CustomEvent<GridData>) {
-		openCover(game, ev.detail);
-		dispatch('updateGame', game);
+		gameStore.openCover(ev.detail);
 	}
 </script>
 
@@ -49,8 +39,8 @@
 	<div>
 		<div class="header">
 			<Title />
-			{#if game.status === 'READY' || game.status === 'PLAYING'}
-				<button class="discard" on:click={handleDiscard}>✘</button>
+			{#if enabled}
+				<button class="discard" on:click={(ev) => gameStore.giveUp()}>✘</button>
 			{/if}
 		</div>
 		<div class="info">
@@ -61,11 +51,11 @@
 							 on:changeMark={handleChangeMark}
 							 on:openCover={handleOpenCover} />
 	</div>
-	{#if game.isGameOverPopupOpen}
-		<GameOverPopup on:backToMenu on:retry />
+	{#if isGameOverPopupOpen}
+		<GameOverPopup />
 	{/if}
-	{#if game.status === 'COMPLETE'}
-		<CongratulationPopup time={game.endTime} bestTime={game.bestTime} on:backToMenu on:retry />
+	{#if state.type === 'COMPLETE' && state.q === 'POPUP-OPEN'}
+		<CongratulationPopup time={game.elapsedSeconds} bestTime={state.bestTime} />
 	{/if}
 </div>
 
@@ -78,11 +68,12 @@
         background-color: white;
         padding: 8px;
         border-radius: 8px;
+        user-select: none;
     }
 
     .header {
         display: flex;
-        user-select: none;
+        height: 30px;
     }
 
     .discard {

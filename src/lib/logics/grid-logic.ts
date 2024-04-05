@@ -28,3 +28,6 @@ export function isCoveredSafeGrid(grid: GridData): boolean {
 	return grid.isCovered && grid.type !== 'MINE';
 }
 
+export function isCovered(grid: GridData): boolean {
+	return grid.displayType === 'COVERED' || grid.displayType === 'UNKNOWN' || grid.displayType === 'FLAG';
+}

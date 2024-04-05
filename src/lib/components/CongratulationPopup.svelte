@@ -1,22 +1,17 @@
 <script lang="ts">
 
 	import Button from '$lib/components/Button.svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { gameStore } from '$lib/game-store';
 
 	export let time: number | undefined;
 	export let bestTime: number | undefined;
 
-	const dispatch = createEventDispatcher<{
-		retry: null;
-		backToMenu: null;
-	}>();
-
 	function handleRetryButton() {
-		dispatch('retry');
+		gameStore.retry(new Date().getTime());
 	}
 
 	function handleBackToMenuButton() {
-		dispatch('backToMenu');
+		gameStore.backToMenu();
 	}
 </script>
 

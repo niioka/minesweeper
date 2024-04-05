@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import Title from '$lib/components/Title.svelte';
-	import type { StageType, StartGameEventPayload } from '$lib/models/game';
+	import type { StageType } from '$lib/models/game';
+	import { gameStore } from '$lib/game-store';
+	import { getRandomBombPositions } from '$lib/logics/game-logic.js';
 
-	const dispatch = createEventDispatcher<{
-		startGame: StartGameEventPayload,
-	}>();
 
 	type Mode = {
 		name: string;
@@ -22,11 +20,12 @@
 	];
 
 	function handleModeButtonClick(mode: Mode) {
-		dispatch('startGame', {
+		gameStore.init({
 			width: mode.width,
 			height: mode.height,
-			bombCount: mode.bombCount,
-			stageType: mode.stageType
+			getMinePositions: getRandomBombPositions(mode.bombCount),
+			stageType: mode.stageType,
+			currentTime: new Date().getTime()
 		});
 	}
 </script>
@@ -36,7 +35,7 @@
 	<div class="buttons">
 		{#each modes as mode}
 			<div class="button-wrapper">
-				<button class="button" on:click|preventDefault={(event) => handleModeButtonClick(mode)}>
+				<button class="button" on:click|preventDefault={(_ev) => handleModeButtonClick(mode)}>
 					<div>{mode.name}</div>
 					<div>
 						{mode.width} x {mode.height}

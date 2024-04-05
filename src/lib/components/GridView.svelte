@@ -58,8 +58,8 @@
 	</button>
 {:else if grid.displayType === "COVERED" || grid.displayType === "FLAG" || grid.displayType === "UNKNOWN"}
 	<button class="grid grid--covered"
-					on:contextmenu|preventDefault={(ev) => handleGridRightClick()}
-					on:click|preventDefault={(ev) => handleGridLeftClick()}
+					on:contextmenu|preventDefault={(_ev) => handleGridRightClick()}
+					on:click|preventDefault={(_ev) => handleGridLeftClick()}
 					tabindex="-1"
 	>
 		{#if grid.displayType === 'FLAG'}🚩{/if}
